@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Water Delivery Orders</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f5f7f5;min-height:100vh;padding:2rem 1rem;color:#1a1a1a}
+  .wrap{max-width:520px;margin:0 auto}
+  .header{text-align:center;margin-bottom:2rem}
+  .header h1{font-size:24px;font-weight:600;color:#1a1a1a;margin-bottom:4px}
+  .header p{font-size:14px;color:#666}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:#E1F5EE;color:#0F6E56;border:1px solid #5DCAA5;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600;margin-bottom:1.5rem}
+  .form-card{background:#fff;border:1px solid #e0e0e0;border-radius:14px;padding:1.75rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+  .field{margin-bottom:1.1rem}
+  .field label{display:block;font-size:13px;color:#555;margin-bottom:6px;font-weight:600}
+  .field input[type=text],.field input[type=number]{width:100%;height:40px;padding:0 12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;font-size:14px;transition:border .15s}
+  .field input:focus{outline:none;border-color:#1D9E75;box-shadow:0 0 0 3px #1D9E7520}
+  .radio-group{display:flex;gap:8px}
+  .radio-option{flex:1;position:relative}
+  .radio-option input[type=radio]{position:absolute;opacity:0;width:0;height:0}
+  .radio-option label{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#666;transition:all .15s;background:#fff;text-align:center}
+  .radio-option input[type=radio]:checked + label{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56}
+  .radio-option label:hover{background:#f5fdf9}
+  .price-display{background:#f5f7f5;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+  .price-display span:first-child{font-size:14px;color:#666;font-weight:500}
+  .price-display .amount{font-size:28px;font-weight:700;color:#1a1a1a}
+  .submit-btn{width:100%;padding:12px;background:#1D9E75;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:1rem}
+  .submit-btn:hover{background:#0F6E56}
+  .submit-btn:active{transform:scale(0.98)}
+  .submit-btn:disabled{background:#9FE1CB;cursor:not-allowed}
+  .status{padding:12px 16px;border-radius:10px;font-size:13px;margin-top:12px;display:none;font-weight:500}
+  .status.success{background:#E1F5EE;color:#0F6E56;border:1px solid #5DCAA5;display:block}
+  .status.error{background:#FCEBEB;color:#A32D2D;border:1px solid #F09595;display:block}
+  .history-card{background:#fff;border:1px solid #e0e0e0;border-radius:14px;overflow:hidden;margin-top:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+  .history-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s}
+  .history-header:hover{background:#f5fdf9}
+  .history-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#1a1a1a}
+  .history-count{background:#f0f0f0;color:#555;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600}
+  .toggle-icon{font-size:20px;color:#888;transition:transform .25s;line-height:1}
+  .toggle-icon.collapsed{transform:rotate(-90deg)}
+  .history-body{border-top:1px solid #e0e0e0;padding:12px}
+  .history-body.hidden{display:none}
+  .order-row{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f5f7f5;border-radius:10px;margin-bottom:6px;font-size:13px}
+  .order-row:last-child{margin-bottom:0}
+  .oname{font-weight:600;flex:1;color:#1a1a1a}
+  .tag{padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700}
+  .tag-mineral{background:#E6F1FB;color:#185FA5}
+  .tag-alkaline{background:#EEEDFE;color:#3C3489}
+  .tag-type{background:#fff;color:#555;border:1px solid #ddd}
+  .qty{color:#888;font-size:12px}
+  .oprice{font-weight:700;color:#0F6E56;margin-left:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>💧 Water Delivery Orders</h1>
+    <p>Fill in the order details below</p>
+  </div>
+  <div style="text-align:center">
+    <span class="badge">✓ Connected to Google Sheets</span>
+  </div>
+
+  <div class="form-card">
+    <div class="field">
+      <label>Customer name</label>
+      <input type="text" id="customer-name" placeholder="Enter name" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>Water type</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="water-type" id="mineral" value="Mineral" checked />
+          <label for="mineral">💧 Mineral<br><span style="font-weight:400;font-size:12px">₱30 / gallon</span></label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="water-type" id="alkaline" value="Alkaline" />
+          <label for="alkaline">🫧 Alkaline<br><span style="font-weight:400;font-size:12px">₱50 / gallon</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Gallon type</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="gallon-type" id="slim" value="Slim" checked />
+          <label for="slim">Slim</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="gallon-type" id="round" value="Round" />
+          <label for="round">Round</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Quantity</label>
+      <input type="number" id="quantity" min="1" value="1" step="1" style="width:120px" />
+    </div>
+
+    <div class="price-display">
+      <span>Total price</span>
+      <span class="amount" id="total-price">₱30</span>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitOrder()">Submit Order →</button>
+    <div class="status" id="status-msg"></div>
+  </div>
+
+  <div class="history-card" id="history-section" style="display:none">
+    <div class="history-header" onclick="toggleHistory()">
+      <div class="history-title">
+        🕓 Recent orders
+        <span class="history-count" id="order-count">0</span>
+      </div>
+      <span class="toggle-icon" id="toggle-icon">&#8964;</span>
+    </div>
+    <div class="history-body" id="history-body">
+      <div id="order-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxelMEtHrT6564abpU2UDvHVyZ1CtEtPFDXG0SWKMHUovQ6QcgYg1fkWt_k_wurOMtq/exec';
+const PRICES = { Mineral: 30, Alkaline: 50 };
+let sessionOrders = [];
+let historyOpen = true;
+
+function getPrice() {
+  const type = document.querySelector('input[name="water-type"]:checked')?.value || 'Mineral';
+  const qty = parseInt(document.getElementById('quantity').value) || 1;
+  return PRICES[type] * qty;
+}
+
+function updatePrice() {
+  document.getElementById('total-price').textContent = '₱' + getPrice().toLocaleString();
+}
+
+document.querySelectorAll('input[name="water-type"], #quantity').forEach(el => {
+  el.addEventListener('change', updatePrice);
+  el.addEventListener('input', updatePrice);
+});
+
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('history-body').classList.toggle('hidden', !historyOpen);
+  document.getElementById('toggle-icon').classList.toggle('collapsed', !historyOpen);
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+async function submitOrder() {
+  const name = document.getElementById('customer-name').value.trim();
+  const waterType = document.querySelector('input[name="water-type"]:checked')?.value;
+  const gallonType = document.querySelector('input[name="gallon-type"]:checked')?.value;
+  const qty = parseInt(document.getElementById('quantity').value) || 1;
+  const total = getPrice();
+
+  if (!name) { showStatus('Please enter a customer name.', 'error'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit' });
+  const row = [dateStr, timeStr, name, waterType, gallonType, qty, total];
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ row })
+    });
+    showStatus('✓ Order saved to Google Sheets!', 'success');
+    sessionOrders.unshift({ name, waterType, gallonType, qty, total });
+    renderHistory();
+    document.getElementById('customer-name').value = '';
+    document.getElementById('quantity').value = 1;
+    document.querySelector('input[value="Mineral"]').checked = true;
+    document.querySelector('input[value="Slim"]').checked = true;
+    updatePrice();
+  } catch(e) {
+    showStatus('Error: ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Submit Order →';
+}
+
+function renderHistory() {
+  const section = document.getElementById('history-section');
+  const list = document.getElementById('order-list');
+  const count = document.getElementById('order-count');
+  if (!sessionOrders.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  count.textContent = sessionOrders.length;
+  list.innerHTML = sessionOrders.slice(0, 10).map(o => `
+    <div class="order-row">
+      <span class="oname">${o.name}</span>
+      <span class="tag tag-${o.waterType.toLowerCase()}">${o.waterType}</span>
+      <span class="tag tag-type">${o.gallonType}</span>
+      <span class="qty">×${o.qty}</span>
+      <span class="oprice">₱${o.total.toLocaleString()}</span>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>
