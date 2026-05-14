@@ -1,0 +1,224 @@
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-sans)}
+  .wrap{padding:1.5rem 0;max-width:560px;margin:0 auto}
+  .header{text-align:center;margin-bottom:2rem}
+  .header h1{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+  .header p{font-size:14px;color:var(--color-text-secondary)}
+  .setup-card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1.5rem}
+  .setup-card h2{font-size:14px;font-weight:500;color:var(--color-text-secondary);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .form-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem;margin-bottom:1rem}
+  .field{margin-bottom:1rem}
+  .field label{display:block;font-size:13px;color:var(--color-text-secondary);margin-bottom:6px;font-weight:500}
+  .field input,.field select{width:100%;height:36px;padding:0 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px}
+  .field input:focus,.field select:focus{outline:none;box-shadow:0 0 0 2px #1D9E7540;border-color:#1D9E75}
+  .radio-group{display:flex;gap:8px}
+  .radio-option{flex:1;position:relative}
+  .radio-option input[type=radio]{position:absolute;opacity:0;width:0;height:0}
+  .radio-option label{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;font-weight:500;color:var(--color-text-secondary);transition:all .15s;background:var(--color-background-primary)}
+  .radio-option input[type=radio]:checked + label{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56}
+  .radio-option label:hover{background:var(--color-background-secondary)}
+  .price-display{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+  .price-display span:first-child{font-size:13px;color:var(--color-text-secondary)}
+  .price-display .amount{font-size:24px;font-weight:500;color:var(--color-text-primary)}
+  .submit-btn{width:100%;padding:10px;background:#1D9E75;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;margin-top:1rem}
+  .submit-btn:hover{background:#0F6E56}
+  .submit-btn:active{transform:scale(0.98)}
+  .submit-btn:disabled{background:#9FE1CB;cursor:not-allowed}
+  .status{padding:10px 14px;border-radius:var(--border-radius-md);font-size:13px;margin-top:12px;display:none}
+  .status.success{background:#E1F5EE;color:#0F6E56;border:0.5px solid #5DCAA5;display:block}
+  .status.error{background:#FCEBEB;color:#A32D2D;border:0.5px solid #F09595;display:block}
+  .history{margin-top:1.5rem}
+  .history h2{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px}
+  .order-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:6px;font-size:13px}
+  .order-row .name{font-weight:500;flex:1}
+  .order-row .tag{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+  .tag-mineral{background:#E6F1FB;color:#185FA5}
+  .tag-alkaline{background:#EEEDFE;color:#3C3489}
+  .order-row .qty{color:var(--color-text-secondary)}
+  .order-row .price{font-weight:500;color:#0F6E56;margin-left:auto}
+  .setup-toggle{font-size:12px;color:#1D9E75;cursor:pointer;text-decoration:underline;margin-top:6px;display:inline-block}
+  .collapse{display:none}
+  .collapse.open{display:block}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+</style>
+
+<div class="wrap">
+  <h2 class="sr-only">Water delivery order form — submit orders and save them to Google Sheets</h2>
+
+  <div class="header">
+    <h1><i class="ti ti-droplet" aria-hidden="true" style="font-size:20px;color:#1D9E75;vertical-align:-2px;margin-right:4px"></i>Water Delivery Orders</h1>
+    <p>Fill in the order details below</p>
+  </div>
+
+  <div class="setup-card">
+    <h2><i class="ti ti-table" aria-hidden="true" style="font-size:16px"></i> Google Sheets setup</h2>
+    <div id="setup-fields">
+      <div class="field">
+        <label>Spreadsheet ID <span style="font-size:11px;font-weight:400">(from the URL: /spreadsheets/d/<strong>ID</strong>/edit)</span></label>
+        <input type="text" id="sheet-id" placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" />
+      </div>
+      <div class="field">
+        <label>Sheet name (tab name, usually "Sheet1")</label>
+        <input type="text" id="sheet-name" placeholder="Sheet1" value="Sheet1" />
+      </div>
+      <div class="field">
+        <label>Google API Key <span style="font-size:11px;font-weight:400">(<a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:#1D9E75">Get one here</a> — enable Sheets API)</span></label>
+        <input type="password" id="api-key" placeholder="AIza..." />
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin-top:8px"><i class="ti ti-lock" aria-hidden="true" style="font-size:14px;vertical-align:-2px"></i> Your credentials are only stored locally in this session.</p>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="field">
+      <label>Customer name</label>
+      <input type="text" id="customer-name" placeholder="Enter name" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>Water type</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="water-type" id="mineral" value="Mineral" checked />
+          <label for="mineral"><i class="ti ti-droplet" aria-hidden="true" style="font-size:15px"></i> Mineral — ₱30</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="water-type" id="alkaline" value="Alkaline" />
+          <label for="alkaline"><i class="ti ti-droplet-half-2" aria-hidden="true" style="font-size:15px"></i> Alkaline — ₱50</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Gallon type</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="gallon-type" id="slim" value="Slim" checked />
+          <label for="slim"><i class="ti ti-container" aria-hidden="true" style="font-size:15px"></i> Slim</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="gallon-type" id="round" value="Round" />
+          <label for="round"><i class="ti ti-circle" aria-hidden="true" style="font-size:15px"></i> Round</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Quantity</label>
+      <input type="number" id="quantity" min="1" value="1" step="1" />
+    </div>
+
+    <div class="price-display">
+      <span>Total price</span>
+      <span class="amount" id="total-price">₱30</span>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitOrder()">
+      <i class="ti ti-send" aria-hidden="true" style="font-size:16px;vertical-align:-2px;margin-right:6px"></i>Submit Order
+    </button>
+    <div class="status" id="status-msg"></div>
+  </div>
+
+  <div class="history" id="history-section" style="display:none">
+    <h2>Recent orders this session</h2>
+    <div id="order-list"></div>
+  </div>
+</div>
+
+<script>
+const PRICES = { Mineral: 30, Alkaline: 50 };
+let sessionOrders = [];
+
+function getPrice() {
+  const type = document.querySelector('input[name="water-type"]:checked')?.value || 'Mineral';
+  const qty = parseInt(document.getElementById('quantity').value) || 1;
+  return PRICES[type] * qty;
+}
+
+function updatePrice() {
+  document.getElementById('total-price').textContent = '₱' + getPrice().toLocaleString();
+}
+
+document.querySelectorAll('input[name="water-type"], #quantity').forEach(el => {
+  el.addEventListener('change', updatePrice);
+  el.addEventListener('input', updatePrice);
+});
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+async function submitOrder() {
+  const name = document.getElementById('customer-name').value.trim();
+  const waterType = document.querySelector('input[name="water-type"]:checked')?.value;
+  const gallonType = document.querySelector('input[name="gallon-type"]:checked')?.value;
+  const qty = parseInt(document.getElementById('quantity').value) || 1;
+  const total = getPrice();
+  const sheetId = document.getElementById('sheet-id').value.trim();
+  const sheetName = document.getElementById('sheet-name').value.trim() || 'Sheet1';
+  const apiKey = document.getElementById('api-key').value.trim();
+
+  if (!name) { showStatus('Please enter a customer name.', 'error'); return; }
+  if (!sheetId || !apiKey) { showStatus('Please fill in the Spreadsheet ID and API Key above.', 'error'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit' });
+
+  const row = [dateStr, timeStr, name, waterType, gallonType, qty, total];
+
+  try {
+    const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}!A1:append?valueInputOption=USER_ENTERED&key=${apiKey}`;
+    const resp = await fetch(appendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [row] })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || 'Failed to write to sheet');
+    }
+
+    showStatus('Order saved to Google Sheets!', 'success');
+    sessionOrders.unshift({ name, waterType, gallonType, qty, total });
+    renderHistory();
+    document.getElementById('customer-name').value = '';
+    document.getElementById('quantity').value = 1;
+    document.querySelector('input[value="Mineral"]').checked = true;
+    document.querySelector('input[value="Slim"]').checked = true;
+    updatePrice();
+
+  } catch(e) {
+    showStatus('Error: ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-send" aria-hidden="true" style="font-size:16px;vertical-align:-2px;margin-right:6px"></i>Submit Order';
+}
+
+function renderHistory() {
+  const section = document.getElementById('history-section');
+  const list = document.getElementById('order-list');
+  if (!sessionOrders.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = sessionOrders.slice(0,10).map(o => `
+    <div class="order-row">
+      <span class="name">${o.name}</span>
+      <span class="tag tag-${o.waterType.toLowerCase()}">${o.waterType}</span>
+      <span class="tag" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">${o.gallonType}</span>
+      <span class="qty">×${o.qty}</span>
+      <span class="price">₱${o.total.toLocaleString()}</span>
+    </div>
+  `).join('');
+}
+</script>
