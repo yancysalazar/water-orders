@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Water Delivery Orders</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f5f7f5;min-height:100vh;padding:2rem 1rem;color:#1a1a1a}
+  .wrap{max-width:520px;margin:0 auto}
+  .header{text-align:center;margin-bottom:2rem}
+  .header h1{font-size:24px;font-weight:600;color:#1a1a1a;margin-bottom:4px}
+  .header p{font-size:14px;color:#666}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:#E1F5EE;color:#0F6E56;border:1px solid #5DCAA5;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600;margin-bottom:1.5rem}
+  .form-card{background:#fff;border:1px solid #e0e0e0;border-radius:14px;padding:1.75rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+  .field{margin-bottom:1.1rem}
+  .field label{display:block;font-size:13px;color:#555;margin-bottom:6px;font-weight:600}
+  .field input[type=text]{width:100%;height:40px;padding:0 12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;font-size:14px;transition:border .15s}
+  .field input:focus{outline:none;border-color:#1D9E75;box-shadow:0 0 0 3px #1D9E7520}
+  .radio-group{display:flex;gap:8px}
+  .radio-option{flex:1;position:relative}
+  .radio-option input[type=radio]{position:absolute;opacity:0;width:0;height:0}
+  .radio-option label{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#666;transition:all .15s;background:#fff;text-align:center}
+  .radio-option input[type=radio]:checked + label{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56}
+  .radio-option label:hover{background:#f5fdf9}
+
+  .gallon-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px;background:#fff}
+  .gallon-row:last-child{margin-bottom:0}
+  .gallon-label{font-size:14px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+  .gallon-subtotal{font-size:12px;color:#1D9E75;font-weight:600}
+  .qty-control{display:flex;align-items:center;gap:10px}
+  .qty-btn{width:32px;height:32px;border:1px solid #ddd;border-radius:8px;background:#f5f7f5;color:#1a1a1a;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-weight:500}
+  .qty-btn:hover{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56}
+  .qty-num{width:28px;text-align:center;font-size:16px;font-weight:600;color:#1a1a1a}
+
+  .price-display{background:#f5f7f5;border-radius:10px;padding:14px 18px;margin-top:1rem}
+  .price-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#666;margin-bottom:6px}
+  .price-row .val{font-weight:500;color:#1a1a1a}
+  .price-divider{border:none;border-top:1px solid #e0e0e0;margin:8px 0}
+  .price-row.total{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:0}
+  .price-row.total .val{font-size:22px;font-weight:700;color:#0F6E56}
+
+  .submit-btn{width:100%;padding:12px;background:#1D9E75;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:1rem}
+  .submit-btn:hover{background:#0F6E56}
+  .submit-btn:active{transform:scale(0.98)}
+  .submit-btn:disabled{background:#9FE1CB;cursor:not-allowed}
+  .status{padding:12px 16px;border-radius:10px;font-size:13px;margin-top:12px;display:none;font-weight:500}
+  .status.success{background:#E1F5EE;color:#0F6E56;border:1px solid #5DCAA5;display:block}
+  .status.error{background:#FCEBEB;color:#A32D2D;border:1px solid #F09595;display:block}
+
+  .history-card{background:#fff;border:1px solid #e0e0e0;border-radius:14px;overflow:hidden;margin-top:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+  .history-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s}
+  .history-header:hover{background:#f5fdf9}
+  .history-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#1a1a1a}
+  .history-count{background:#f0f0f0;color:#555;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600}
+  .toggle-icon{font-size:20px;color:#888;transition:transform .25s;line-height:1}
+  .toggle-icon.collapsed{transform:rotate(-90deg)}
+  .history-body{border-top:1px solid #e0e0e0;padding:12px}
+  .history-body.hidden{display:none}
+  .order-row{padding:10px 14px;background:#f5f7f5;border-radius:10px;margin-bottom:6px}
+  .order-row:last-child{margin-bottom:0}
+  .order-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .oname{font-weight:600;flex:1;color:#1a1a1a;font-size:13px}
+  .tag{padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700}
+  .tag-mineral{background:#E6F1FB;color:#185FA5}
+  .tag-alkaline{background:#EEEDFE;color:#3C3489}
+  .oprice{font-weight:700;color:#0F6E56;font-size:13px}
+  .order-detail{font-size:12px;color:#888;display:flex;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>💧 Water Delivery Orders</h1>
+    <p>Fill in the order details below</p>
+  </div>
+  <div style="text-align:center">
+    <span class="badge">✓ Connected to Google Sheets</span>
+  </div>
+
+  <div class="form-card">
+    <div class="field">
+      <label>Customer name</label>
+      <input type="text" id="customer-name" placeholder="Enter name" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>Water type</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="water-type" id="mineral" value="Mineral" checked />
+          <label for="mineral">💧 Mineral — ₱30</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="water-type" id="alkaline" value="Alkaline" />
+          <label for="alkaline">🫧 Alkaline — ₱50</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Gallon type & quantity</label>
+      <div class="gallon-row">
+        <div class="gallon-label">
+          Slim
+          <span class="gallon-subtotal" id="slim-subtotal"></span>
+        </div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('slim', -1)">−</button>
+          <span class="qty-num" id="slim-qty">0</span>
+          <button class="qty-btn" onclick="changeQty('slim', 1)">+</button>
+        </div>
+      </div>
+      <div class="gallon-row">
+        <div class="gallon-label">
+          Round
+          <span class="gallon-subtotal" id="round-subtotal"></span>
+        </div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('round', -1)">−</button>
+          <span class="qty-num" id="round-qty">0</span>
+          <button class="qty-btn" onclick="changeQty('round', 1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="price-display">
+      <div class="price-row">
+        <span>Slim (<span id="slim-qty-label">0</span> gal)</span>
+        <span class="val" id="slim-price-label">₱0</span>
+      </div>
+      <div class="price-row">
+        <span>Round (<span id="round-qty-label">0</span> gal)</span>
+        <span class="val" id="round-price-label">₱0</span>
+      </div>
+      <hr class="price-divider" />
+      <div class="price-row total">
+        <span>Total</span>
+        <span class="val" id="total-price">₱0</span>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitOrder()">Submit Order →</button>
+    <div class="status" id="status-msg"></div>
+  </div>
+
+  <div class="history-card" id="history-section" style="display:none">
+    <div class="history-header" onclick="toggleHistory()">
+      <div class="history-title">
+        🕓 Recent orders
+        <span class="history-count" id="order-count">0</span>
+      </div>
+      <span class="toggle-icon" id="toggle-icon">&#8964;</span>
+    </div>
+    <div class="history-body" id="history-body">
+      <div id="order-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxelMEtHrT6564abpU2UDvHVyZ1CtEtPFDXG0SWKMHUovQ6QcgYg1fkWt_k_wurOMtq/exec';
+const PRICES = { Mineral: 30, Alkaline: 50 };
+let qty = { slim: 0, round: 0 };
+let sessionOrders = [];
+let historyOpen = true;
+
+function getUnitPrice() {
+  return PRICES[document.querySelector('input[name="water-type"]:checked')?.value || 'Mineral'];
+}
+
+function changeQty(type, delta) {
+  qty[type] = Math.max(0, qty[type] + delta);
+  updatePrice();
+}
+
+function updatePrice() {
+  const unit = getUnitPrice();
+  const slimTotal = qty.slim * unit;
+  const roundTotal = qty.round * unit;
+  const grand = slimTotal + roundTotal;
+
+  document.getElementById('slim-qty').textContent = qty.slim;
+  document.getElementById('round-qty').textContent = qty.round;
+  document.getElementById('slim-subtotal').textContent = slimTotal > 0 ? '₱' + slimTotal.toLocaleString() : '';
+  document.getElementById('round-subtotal').textContent = roundTotal > 0 ? '₱' + roundTotal.toLocaleString() : '';
+  document.getElementById('slim-qty-label').textContent = qty.slim;
+  document.getElementById('round-qty-label').textContent = qty.round;
+  document.getElementById('slim-price-label').textContent = '₱' + slimTotal.toLocaleString();
+  document.getElementById('round-price-label').textContent = '₱' + roundTotal.toLocaleString();
+  document.getElementById('total-price').textContent = '₱' + grand.toLocaleString();
+}
+
+document.querySelectorAll('input[name="water-type"]').forEach(el => {
+  el.addEventListener('change', updatePrice);
+});
+
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('history-body').classList.toggle('hidden', !historyOpen);
+  document.getElementById('toggle-icon').classList.toggle('collapsed', !historyOpen);
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+async function submitOrder() {
+  const name = document.getElementById('customer-name').value.trim();
+  const waterType = document.querySelector('input[name="water-type"]:checked')?.value;
+  const unit = getUnitPrice();
+  const slimQty = qty.slim;
+  const roundQty = qty.round;
+  const slimTotal = slimQty * unit;
+  const roundTotal = roundQty * unit;
+  const grand = slimTotal + roundTotal;
+
+  if (!name) { showStatus('Please enter a customer name.', 'error'); return; }
+  if (slimQty === 0 && roundQty === 0) { showStatus('Please add at least 1 gallon.', 'error'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit' });
+  const row = [dateStr, timeStr, name, waterType, slimQty, roundQty, grand];
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ row })
+    });
+    showStatus('✓ Order saved to Google Sheets!', 'success');
+    sessionOrders.unshift({ name, waterType, slimQty, roundQty, grand });
+    renderHistory();
+    document.getElementById('customer-name').value = '';
+    qty = { slim: 0, round: 0 };
+    document.querySelector('input[value="Mineral"]').checked = true;
+    updatePrice();
+  } catch(e) {
+    showStatus('Error: ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Submit Order →';
+}
+
+function renderHistory() {
+  const section = document.getElementById('history-section');
+  const list = document.getElementById('order-list');
+  const count = document.getElementById('order-count');
+  if (!sessionOrders.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  count.textContent = sessionOrders.length;
+  list.innerHTML = sessionOrders.slice(0, 10).map(o => {
+    const parts = [];
+    if (o.slimQty > 0) parts.push(`Slim ×${o.slimQty}`);
+    if (o.roundQty > 0) parts.push(`Round ×${o.roundQty}`);
+    return `
+    <div class="order-row">
+      <div class="order-top">
+        <span class="oname">${o.name}</span>
+        <span class="tag tag-${o.waterType.toLowerCase()}">${o.waterType}</span>
+        <span class="oprice">₱${o.grand.toLocaleString()}</span>
+      </div>
+      <div class="order-detail">${parts.map(p => `<span>${p}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+updatePrice();
+</script>
+</body>
+</html>
